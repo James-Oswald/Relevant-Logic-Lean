@@ -9,67 +9,93 @@ inductive Formula : Type where
 | Or : Formula -> Formula -> Formula
 | Imp : Formula -> Formula -> Formula
 
+instance : Coe Nat Formula := ⟨Formula.Atom⟩
+
+--Notations for term level formulae
 prefix:80 "¬ᵣ" => Formula.Not
 infixr:70 "∧ᵣ" => Formula.And
 infixr:65 "∨ᵣ" => Formula.Or
 infixr:60 "→ᵣ" => Formula.Imp
 
--- Routley–Meyer frames
-structure RMFrame where
-  -- Worlds
+-- Unconditioned Routley–Meyer frames
+structure URMFrame where
   W : Type
   R : W -> W -> W → Prop
   S : W -> W    -- *
   O : W         -- 0
-  -- conditions on Routley–Meyer frames
-  C1 (a : W) : R O a a
-  C2 (a b c : W) : R O a b → R O b c → R O a c
-  C3 (a b c d : W) : R O d a -> R a b c -> R d b c
-  C4 (a : W) : S (S a) = a
-  C5 (a b : W) : R O a b -> R O (S b) (S a)
 
-def Leqr {F : RMFrame} (a b : F.W) : Prop := F.R F.O a b
-notation a "≤ᵣ" b => Leqr a b
+def URMFrame.Star {F : URMFrame} (a : F.W) : F.W := F.S a
+prefix:80 "*ᵣ"  => URMFrame.Star
 
--- A Routley–Meyer model is a frame along with a valuation function
--- That satisfies certain conditions
-structure RMModel where
-  F : RMFrame
+def URMFrame.Leq {F : URMFrame} (a b : F.W) : Prop := F.R F.O a b
+infix:70 "≤ᵣ" => URMFrame.Leq
+
+-- Conditioned Routley–Meyer frames
+structure RMFrame extends URMFrame where
+  C1 (a : W) : a ≤ᵣ a
+  C2 (a b c : W) : a ≤ᵣ b → b ≤ᵣ c → a ≤ᵣ c
+  C3 (a b c d : W) : d ≤ᵣ a -> R a b c -> R d b c
+  C4 (a : W) : *ᵣ*ᵣa = a
+  C5 (a b : W) : a ≤ᵣ b -> *ᵣa ≤ᵣ *ᵣb
+
+-- An Unconditioned Routley–Meyer model is a frame along with a valuation function
+structure URMModel extends RMFrame where
   -- Valuation function on atoms
-  VA : F.W -> Nat -> Prop -- We use a relation instead : V(w, atom) == w ∈ v(atom)
-  V : F.W -> Formula -> Prop
-  -- Conditions on the valuation function for compound formulas
-  V_atom (n : Nat) (w : F.W) : V w (Formula.Atom n) = VA w n
-  V_not (φ : Formula) (w : F.W) : V w (¬ᵣφ) = ¬V (F.S w) φ
-  V_and (φ ψ : Formula) (w : F.W) : V w (φ ∧ᵣ ψ) = V w φ ∧ V w ψ
-  V_or (φ ψ : Formula) (w : F.W) : V w (φ ∨ᵣ ψ) = V w φ ∨ V w ψ
-  V_imp (φ ψ : Formula) (a : F.W) : V w (φ →ᵣ ψ) = ∀ (b c : F.W), F.R a b c → V b φ → V c ψ
-  --Hereditariness condition on atoms
-  V_hered (n : Nat) (a b : F.W) : V a (Formula.Atom n) -> (a ≤ᵣ b) -> V b (Formula.Atom n)
+  V : W -> Formula -> Prop
 
--- Need this helper def for the notation
-def valuation (M : RMModel) (w : M.F.W) (φ : Formula) : Prop := M.V w φ
-notation M ":" w "⊨" φ => valuation M w φ
+-- Notation for a formula being true at a world in a model
+def URMModel.holds {M : URMModel} (w : M.W) (φ : Formula) : Prop := M.V w φ
+infix:50 "⊩" => URMModel.holds
+def URMModel.nholds {M : URMModel} (w : M.W) (φ : Formula) : Prop := ¬(w ⊩ φ)
+infix:50 "⊮" => URMModel.nholds
 
-def valid (φ : Formula) : Prop := ∀ (M : RMModel) (w : M.F.W), M : w ⊨ φ
+-- Conditioned Routley–Meyer models
+structure RMModel extends URMModel where
+  -- Basic Conditions
+  V_not (φ : Formula)   (w : W) :    (w ⊩ ¬ᵣφ) ↔ (*ᵣw ⊮ φ)
+  V_and (φ ψ : Formula) (w : W) : (w ⊩ φ ∧ᵣ ψ) ↔ (w ⊩ φ) ∧ (w ⊩ ψ)
+  V_or  (φ ψ : Formula) (w : W) : (w ⊩ φ ∨ᵣ ψ) ↔ (w ⊩ φ) ∨ (w ⊩ ψ)
+  V_imp (φ ψ : Formula) (a : W) : (w ⊩ φ →ᵣ ψ) ↔ ∀ b c, R a b c → b ⊩ φ → c ⊩ ψ
+  -- Hereditariness on atoms condition
+  V_her (n : Nat) (a b : W) : a ⊩ n → a ≤ᵣ b → b ⊩ n
+
+def valid (φ : Formula) : Prop := ∀ (M : RMModel) (w : M.W), w ⊩ φ
 notation "⊨" φ => valid φ
 
+
 -- The hereditariness condition extends from atoms to all formulas
-theorem hered_all (M : RMModel) (a b : M.F.W) (φ : Formula):
-(M : a ⊨ φ) -> (a ≤ᵣ b) -> M : b ⊨ φ := by
+theorem hered_all (M : RMModel) (a b : M.W) (φ : Formula):
+(a ⊩ φ) -> (a ≤ᵣ b) -> b ⊩ φ := by
   intros H1 H2
   induction φ
   . case Atom n =>
-    exact M.V_hered n a b H1 H2
+    exact M.V_her n a b H1 H2
   . case Not φ F =>
     simp [valuation] at *;
     rw [M.V_not φ a] at H1;
     rw [M.V_not φ b]
     contrapose! H1
     sorry
-  . case And => sorry
-  . case Or => sorry
-  . case Imp => sorry
+  . case And φ ψ ih1 ih2 =>
+    simp [valuation, M.V_and] at *;
+    apply And.intro
+    . exact ih1 H1.left
+    . exact ih2 H1.right
+  . case Or φ ψ ih1 ih2 =>
+    simp [valuation, M.V_or] at *;
+    cases H1
+    . case inl C =>
+      apply Or.inl
+      exact ih1 C
+    . case inr C =>
+      apply Or.inr
+      exact ih2 C
+  . case Imp φ ψ ih1 ih2 =>
+    simp [valuation, M.V_imp] at *;
+    intros b c R1 R2
+    apply ih2
+    . exact H1 (b := b) R1
+    . exact H2 (b := c) R2
 
 
 
