@@ -57,16 +57,19 @@ notation "⊨" φ => valid φ
 -- The hereditariness condition extends from atoms to all formulas
 theorem hered_all (M : RMModel) (a b : M.F.W) (φ : Formula):
 (M : a ⊨ φ) -> (a ≤ᵣ b) -> M : b ⊨ φ := by
-intros H1 H2
-induction φ
-. case Atom n =>
-  exact M.V_hered n a b H1 H2
-. case Not φ F =>
-  simp [valuation] at *;
-  rw [M.V_not φ a] at H1;
-  rw [M.V_not φ b]
-  contrapose! H1
-  sorry
+  intros H1 H2
+  induction φ
+  . case Atom n =>
+    exact M.V_hered n a b H1 H2
+  . case Not φ F =>
+    simp [valuation] at *;
+    rw [M.V_not φ a] at H1;
+    rw [M.V_not φ b]
+    contrapose! H1
+    sorry
+  . case And => sorry
+  . case Or => sorry
+  . case Imp => sorry
 
 
 
@@ -85,18 +88,12 @@ induction φ
 
 
 theorem ax1_valid : ⊨ (A →ᵣ A) := by
-intros M w
-simp [entails]
-intros b c Rwb H
-sorry
+  sorry
 
 
 -- Adding Raaa as a frame condition allows us to validate the psudo-modus ponens axiom
 theorem PMP (M : RMModel) (A B : Formula) : (∀ (a : M.F.W), M.F.R a a a) -> ⊨ (A ∧ᵣ (A →ᵣ B)) →ᵣ B := by
-intros FrameCond M w
-simp [entails]
-intros b1 c1 Rwb1c1 H1 H2
-sorry
+  sorry
 
 
 -- The type of proofs of a formula under Hilbert-style RL axioms
