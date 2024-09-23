@@ -28,7 +28,9 @@ lemma and_elim_right_valid : ⊨ᴮ (A ∧ᵣ B →ᵣ B) := by
 lemma and_intro_valid : ⊨ᴮ ((A →ᵣ B) →ᵣ (A →ᵣ C) →ᵣ (A →ᵣ B ∧ᵣ C)) := by
   intros M
   simp only [M.V_imp, and_imp, M.V_and]
-  intros w1 w2 R12 w1AB w3 w4 R234 w3AC w5 w6 R456 w5A
+  intros w1 w2 R012 w1AB w3 w4 R234 w3AC w5 w6 R456 w5A
+  have H1 := (M.con_? w2 w3 w4 w1) R012 R234
+  have H2 := w1AB w3 w4 H1
   sorry
 
 theorem or_intro_left_valid : ⊨ᴮ (A →ᵣ A ∨ᵣ B) := by
@@ -86,40 +88,26 @@ theorem rcont_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ ¬ᵣB →ᵣ ¬ᵣA) := b
   have H1' := H M
   simp_all only [M.V_imp, and_imp, M.V_not]
   intros w1 w2 R012 w1nB
-  have R0s2s1 := M.con_star w1 w2 R012
-  have H1'' := H1' w1 w2 R012
-  sorry
+  contrapose! w1nB
+  simp_all only [URMModel.nholds, not_not]
+  exact H1' (w2*ᵣ) (w1*ᵣ) (M.con_star w1 w2 R012) w1nB
 
 theorem RM_sound (ϕ : Formula) : ⊢ᴮ ϕ → ⊨ᴮ ϕ := by
   intros H
   cases H
   . case intro val =>
     induction val
-    . case id =>
-      exact id_valid
-    . case and_elim_left =>
-      exact and_elim_left_valid
-    . case and_elim_right =>
-      exact and_elim_right_valid
-    . case and_intro =>
-      exact and_intro_valid
-    . case or_intro_left =>
-      exact or_intro_left_valid
-    . case or_intro_right =>
-      exact or_intro_right_valid
-    . case or_elim =>
-      exact or_elim_valid
-    . case and_or =>
-      exact and_or_valid
-    . case dne =>
-      exact dne_valid
-    . case mp ih1 ih2 =>
-      exact mp_valid ih1 ih2
-    . case adj ih1 ih2 =>
-      exact adj_valid ih1 ih2
-    . case pre ih =>
-      exact pre_valid ih
-    . case suf ih =>
-      exact suf_valid ih
-    . case rcont ih =>
-      exact rcont_valid ih
+    . case id => exact id_valid
+    . case and_elim_left => exact and_elim_left_valid
+    . case and_elim_right => exact and_elim_right_valid
+    . case and_intro => exact and_intro_valid
+    . case or_intro_left => exact or_intro_left_valid
+    . case or_intro_right => exact or_intro_right_valid
+    . case or_elim => exact or_elim_valid
+    . case and_or => exact and_or_valid
+    . case dne => exact dne_valid
+    . case mp ih1 ih2 => exact mp_valid ih1 ih2
+    . case adj ih1 ih2 => exact adj_valid ih1 ih2
+    . case pre ih => exact pre_valid ih
+    . case suf ih => exact suf_valid ih
+    . case rcont ih => exact rcont_valid ih
