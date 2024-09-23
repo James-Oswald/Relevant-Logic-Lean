@@ -16,6 +16,7 @@ Proofs are inductively defined types where a formula is either an instance
 of an axiom or derived via a rule of inference.
 -/
 inductive BProof : Formula -> Type
+--axioms
 | id               {ϕ} : BProof (ϕ →ᵣ ϕ)
 | and_elim_left  {ϕ ψ} : BProof (ϕ ∧ᵣ ψ →ᵣ ϕ)
 | and_elim_right {ϕ ψ} : BProof (ϕ ∧ᵣ ψ →ᵣ ψ)
@@ -25,11 +26,12 @@ inductive BProof : Formula -> Type
 | or_elim      {ϕ ψ χ} : BProof ((ϕ →ᵣ χ) →ᵣ (ψ →ᵣ χ) →ᵣ (ϕ ∨ᵣ ψ →ᵣ χ))
 | and_or       {ϕ ψ χ} : BProof (ϕ ∧ᵣ (ψ ∨ᵣ χ) →ᵣ (ϕ ∧ᵣ ψ) ∨ᵣ (ϕ ∧ᵣ χ))
 | dne              {ϕ} : BProof (¬ᵣ¬ᵣϕ →ᵣ ϕ)
+--inference rules
 | mp {ϕ ψ} : BProof ϕ → BProof (ϕ →ᵣ ψ) → BProof ψ
-| CI {ϕ ψ} : BProof ϕ → BProof ψ → BProof (ϕ ∧ᵣ ψ)
-| DI1 {ϕ ψ} : BProof (ϕ →ᵣ ψ) → BProof ((C →ᵣ ϕ) →ᵣ (C →ᵣ ψ))
-| DI2 {ϕ ψ} : BProof (ϕ →ᵣ ψ) → BProof ((ψ →ᵣ C) →ᵣ (ϕ →ᵣ C))
-| CO {ϕ ψ} : BProof (ϕ →ᵣ ψ) → BProof (¬ᵣψ →ᵣ ¬ᵣϕ)
+| adj {ϕ ψ} : BProof ϕ → BProof ψ → BProof (ϕ ∧ᵣ ψ)
+| pre {ϕ ψ χ} : BProof (ϕ →ᵣ ψ) → BProof ((χ →ᵣ ϕ) →ᵣ (χ →ᵣ ψ))
+| suf {ϕ ψ χ} : BProof (ϕ →ᵣ ψ) → BProof ((ψ →ᵣ χ) →ᵣ (ϕ →ᵣ χ))
+| rcont {ϕ ψ} : BProof (ϕ →ᵣ ψ) → BProof (¬ᵣψ →ᵣ ¬ᵣϕ)
 
 -- Shorthand notation for the type of proofs of a formula
 prefix:80 "T⊢ᴮ " => BProof

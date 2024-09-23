@@ -24,12 +24,17 @@ structure URMFrame where
   /-- Distinguished World, 0 -/
   O : W
 
+-- TODO: This dosen't seem to work in many places
+/-- The numeric literal "0" can be coerced into the designated world F.O -/
+instance {F : URMFrame} : OfNat F.W 0 := ⟨F.O⟩
+example {F : URMFrame} : F.W := 0
+
 /-- The *ᵣ operator maps worlds to worlds -/
 def URMFrame.Star {F : URMFrame} (a : F.W) : F.W := F.S a
 postfix:80 "*ᵣ"  => URMFrame.Star
 
 /-- The containment relation, w1 ≤ᵣ w2 -/
-def URMFrame.Contains {F : URMFrame} (a b : F.W) : Prop := F.R F.O a b
+def URMFrame.Contains {F : URMFrame} (a b : F.W) : Prop := F.R 0 a b
 infix:70 " ≤ᵣ " => URMFrame.Contains
 
 /-- Conditioned Routley–Meyer frames -/
@@ -66,7 +71,7 @@ structure RMModel extends URMModel where
 
 /-- A `Formula` ϕ is valid (⊨ᴮ ϕ) iff it holds at every world `URMFrame.W`
     in every `RMModel` -/
-def valid (ϕ : Formula) : Prop := ∀ (M : RMModel) (w : M.W), w ⊩ ϕ
+def valid (ϕ : Formula) : Prop := ∀ (M : RMModel), M.O ⊩ ϕ
 prefix:50 "⊨ᴮ " => valid
 
 
@@ -85,7 +90,7 @@ theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
     exact or_iff_not_and_not.mp H
 
 /-- The hereditariness condition extends from atoms to all formulas -/
-theorem RModel.heredity (M : RMModel) (a b : M.W) (φ : Formula):
+theorem RMModel.heredity (M : RMModel) (a b : M.W) (φ : Formula):
 (a ⊩ φ) -> (a ≤ᵣ b) -> b ⊩ φ := by
   intros H1 H2
   induction φ generalizing a b
