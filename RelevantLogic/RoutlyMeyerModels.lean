@@ -45,6 +45,10 @@ structure RMFrame extends URMFrame where
   star_star (a : W)       : a*ᵣ*ᵣ = a
   con_star  (a b : W)     : a ≤ᵣ b -> b*ᵣ ≤ᵣ a*ᵣ
 
+theorem RMFrame.con_?' (F : RMFrame) {a b c d: F.W} :
+d ≤ᵣ a -> F.R a b c -> F.R d b c := by
+  intros H1 H2
+  exact F.con_? a b c d H1 H2
 
 /-- An Unconditioned Routley–Meyer model
    is a frame along with a valuation function -/
@@ -75,8 +79,10 @@ def valid (ϕ : Formula) : Prop := ∀ (M : RMModel), M.O ⊩ ϕ
 prefix:50 "⊨ᴮ " => valid
 
 
--- The semantics of or lines up as expected
--- due to its definition in terms of not and and
+/--
+The semantics of or lines up as expected with respect to its definition
+in terms of not and and
+-/
 theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
 (w ⊩ φ ∨ᵣ ψ) ↔ (w ⊩ φ) ∨ (w ⊩ ψ) := by
   apply Iff.intro
@@ -88,6 +94,32 @@ theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
     intro H
     simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star]
     exact or_iff_not_and_not.mp H
+
+/--
+The semantics of fusion lines lines up with respect to its definition
+in terms of relevant implication and negation.
+-/
+theorem RMModel.V_fusion (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ):= by
+  apply Iff.intro
+  . case mp =>
+    intro H
+    simp only [Formula.Fusion, M.V_not, URMModel.nholds, M.V_imp, M.V_not,
+               and_imp, not_forall, Classical.not_imp, not_not] at H
+
+    have ⟨w1, w2, H1, H2, H3⟩ := H
+    exists w1, (w2*ᵣ)
+    apply And.intro
+    . case left => sorry
+    . case right =>
+      apply And.intro H2 H3
+  . case mpr =>
+    intro H
+    have ⟨w1, w2, H1, H2, H3⟩ := H
+    simp only [Formula.Fusion, M.V_not, URMModel.nholds, M.V_imp, M.V_not,
+               and_imp, not_forall, Classical.not_imp, not_not]
+    exists w1, w2
+    sorry
 
 /-- The hereditariness condition extends from atoms to all formulas -/
 theorem RMModel.heredity (M : RMModel) (a b : M.W) (φ : Formula):
