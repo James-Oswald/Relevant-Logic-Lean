@@ -20,10 +20,10 @@ inductive BProof : Formula -> Type
 | id               {ϕ} : BProof (ϕ →ᵣ ϕ)
 | and_elim_left  {ϕ ψ} : BProof (ϕ ∧ᵣ ψ →ᵣ ϕ)
 | and_elim_right {ϕ ψ} : BProof (ϕ ∧ᵣ ψ →ᵣ ψ)
-| and_intro    {ϕ ψ χ} : BProof ((ϕ →ᵣ ψ) →ᵣ (ϕ →ᵣ χ) →ᵣ (ϕ →ᵣ ψ ∧ᵣ χ))
+| and_intro    {ϕ ψ χ} : BProof ((ϕ →ᵣ ψ) ∧ᵣ (ϕ →ᵣ χ) →ᵣ (ϕ →ᵣ ψ ∧ᵣ χ))
 | or_intro_left  {ϕ ψ} : BProof (ϕ →ᵣ ϕ ∨ᵣ ψ)
 | or_intro_right {ϕ ψ} : BProof (ψ →ᵣ ϕ ∨ᵣ ψ)
-| or_elim      {ϕ ψ χ} : BProof ((ϕ →ᵣ χ) →ᵣ (ψ →ᵣ χ) →ᵣ (ϕ ∨ᵣ ψ →ᵣ χ))
+| or_elim      {ϕ ψ χ} : BProof ((ϕ →ᵣ χ) ∧ᵣ (ψ →ᵣ χ) →ᵣ (ϕ ∨ᵣ ψ →ᵣ χ))
 | and_or       {ϕ ψ χ} : BProof (ϕ ∧ᵣ (ψ ∨ᵣ χ) →ᵣ (ϕ ∧ᵣ ψ) ∨ᵣ (ϕ ∧ᵣ χ))
 | dne              {ϕ} : BProof (¬ᵣ¬ᵣϕ →ᵣ ϕ)
 --inference rules

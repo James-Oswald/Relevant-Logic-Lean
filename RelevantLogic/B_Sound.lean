@@ -25,13 +25,16 @@ lemma and_elim_right_valid : ⊨ᴮ (A ∧ᵣ B →ᵣ B) := by
   simp [M.V_and] at H2
   exact M.heredity b c B H2.right H1
 
-lemma and_intro_valid : ⊨ᴮ ((A →ᵣ B) →ᵣ (A →ᵣ C) →ᵣ (A →ᵣ B ∧ᵣ C)) := by
+lemma and_intro_valid : ⊨ᴮ ((A →ᵣ B) ∧ᵣ (A →ᵣ C) →ᵣ (A →ᵣ B ∧ᵣ C)) := by
   intros M
   simp only [M.V_imp, and_imp, M.V_and]
-  intros w1 w2 R012 w1AB w3 w4 R234 w3AC w5 w6 R456 w5A
-  have H1 := M.con_? w2 w3 w4 w1 R012 R234
-  have H2 := w1AB w3 w4 H1
-  sorry
+  intros w1 w2 R012 H1AB H1AC w3 w4 R234 w3A
+  have R134 := M.con_?' R012 R234
+  apply And.intro
+  . case left =>
+    exact H1AB w3 w4 R134 w3A
+  . case right =>
+    exact H1AC w3 w4 R134 w3A
 
 theorem or_intro_left_valid : ⊨ᴮ (A →ᵣ A ∨ᵣ B) := by
   intros M
@@ -47,13 +50,16 @@ theorem or_intro_right_valid : ⊨ᴮ (B →ᵣ A ∨ᵣ B) := by
   apply Or.inr
   exact M.heredity b c B H2 H1
 
-theorem or_elim_valid : ⊨ᴮ ((A →ᵣ C) →ᵣ (B →ᵣ C) →ᵣ (A ∨ᵣ B →ᵣ C)) := by
+theorem or_elim_valid : ⊨ᴮ ((A →ᵣ C) ∧ᵣ (B →ᵣ C) →ᵣ (A ∨ᵣ B →ᵣ C)) := by
   intros M
-  simp only [M.V_imp, and_imp, M.V_or]
-  intros w1 w2 R012 H1AC w3 w4 R234 H3BC w5 w6 R456 H5AorB
-  have H1AC' := H1AC w2 w3
-  --have R034 : w3 ≤ᵣ w4 := M.con_?' R012 R234
-  sorry
+  simp only [M.V_imp, and_imp, M.V_or, M.V_and]
+  intros w1 w2 R012 H1AC H1BC w3 w4 R234 w3AoB
+  have R134 := M.con_?' R012 R234
+  cases w3AoB
+  . case inl w3A =>
+    exact H1AC w3 w4 R134 w3A
+  . case inr w3B =>
+    exact H1BC w3 w4 R134 w3B
 
 theorem and_or_valid : ⊨ᴮ (A ∧ᵣ (B ∨ᵣ C) →ᵣ (A ∧ᵣ B) ∨ᵣ (A ∧ᵣ C)) := by
   intro M
@@ -90,18 +96,30 @@ theorem pre_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (C →ᵣ A) →ᵣ (C →�
   intros H M
   have H0AB := H M
   simp_all only [M.V_imp]
-  intros w1 w2 R012_H1AC w3 w4 R234_H3C
-  have ⟨R012, H1AC⟩ := R012_H1AC
+  intros w1 w2 R012_H1CA w3 w4 R234_H3C
+  have ⟨R012, H1CA⟩ := R012_H1CA
   have ⟨R234, H3C⟩ := R234_H3C
-  have R124 := M.con_? w2 w3 w4 w1 R012 R234
-  clear R012_H1AC R234_H3C
-  apply H0AB w3 w4
-  have H012AB := H0AB w1 w2
-
-  sorry
+  clear R012_H1CA R234_H3C
+  have R134 := M.con_?' R012 R234
+  have w4A := H1CA w3 w4 (And.intro R134 H3C)
+  apply H0AB w4 w4
+  exact ⟨M.con_rfl w4, w4A⟩
 
 theorem suf_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (B →ᵣ C) →ᵣ (A →ᵣ C)) := by
-  sorry
+  intros H M
+  have H0AB := H M
+  simp_all only [M.V_imp]
+  intros w1 w2 R012_H1BC w3 w4 R234_H3A
+  have ⟨R012, H1BC⟩ := R012_H1BC
+  have ⟨R234, H3A⟩ := R234_H3A
+  clear R012_H1BC R234_H3A
+  have R134 := M.con_?' R012 R234
+  apply H1BC w3 w4
+  apply And.intro
+  . case left =>
+    exact R134
+  . case right =>
+    apply H0AB w3 w3 ⟨M.con_rfl w3, H3A⟩
 
 theorem rcont_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ ¬ᵣB →ᵣ ¬ᵣA) := by
   intros H M
