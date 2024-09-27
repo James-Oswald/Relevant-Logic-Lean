@@ -6,11 +6,11 @@ import Aesop
 
 import RelevantLogic.Formula
 
-/-! # Routley–Meyer Models for Relevance Logic
+/-! # Routley–Meyer Models
 
 This file contains definitions for baisc Routley-Meyer Frames
-and Models for Relevance Logic. It also contains proofs
-of some basic properties of these models, such as hereditariness.
+and Models for Relevant Logic, as well as some basic theorems
+about them.
 -/
 
 /-- Unconditioned Routley–Meyer frames -/
@@ -37,16 +37,38 @@ postfix:80 "*ᵣ"  => URMFrame.Star
 def URMFrame.Contains {F : URMFrame} (a b : F.W) : Prop := F.R 0 a b
 infix:70 " ≤ᵣ " => URMFrame.Contains
 
+def URMFrame.Related {F : URMFrame} (a b c : F.W) : Prop := F.R a b c
+notation "Rᵣ" a:max b:max c:max  => URMFrame.Related a b c
+
 /-- Conditioned Routley–Meyer frames -/
 structure RMFrame extends URMFrame where
   con_rfl   (a : W)       : a ≤ᵣ a
   con_trans (a b c : W)   : a ≤ᵣ b → b ≤ᵣ c → a ≤ᵣ c
-  con_?     (a b c d : W) : d ≤ᵣ a -> R a b c -> R d b c
+  con_?     (a b c d : W) : d ≤ᵣ a -> Rᵣ a b c -> Rᵣ d b c
   star_star (a : W)       : a*ᵣ*ᵣ = a
   con_star  (a b : W)     : a ≤ᵣ b -> b*ᵣ ≤ᵣ a*ᵣ
 
+
+lemma RMFrame.eq_imp_con (F : RMFrame) {a b : F.W} :
+a = b -> a ≤ᵣ b := by
+  intro H
+  simp only [H, F.con_rfl b]
+
+lemma RMFrame.eq_imp_con' (F : RMFrame) {a b : F.W} :
+a = b -> b ≤ᵣ a := by
+  intro H
+  simp only [H, F.con_rfl b]
+
+theorem RMFrame.con_eq (F : RMFrame) {a b : F.W} :
+a ≤ᵣ b -> b ≤ᵣ a -> a = b := by
+  sorry
+
+/--
+Version of `RMFrame.con_?` that infers worlds from hypotheses
+via type unification, very useful for actually proving things.
+-/
 theorem RMFrame.con_?' (F : RMFrame) {a b c d: F.W} :
-d ≤ᵣ a -> F.R a b c -> F.R d b c := by
+d ≤ᵣ a -> F.R a b c -> Rᵣ d b c := by
   intros H1 H2
   exact F.con_? a b c d H1 H2
 
@@ -78,49 +100,6 @@ structure RMModel extends URMModel where
 def valid (ϕ : Formula) : Prop := ∀ (M : RMModel), M.O ⊩ ϕ
 prefix:50 "⊨ᴮ " => valid
 
-
-/--
-The semantics of or lines up as expected with respect to its definition
-in terms of not and and
--/
-theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∨ᵣ ψ) ↔ (w ⊩ φ) ∨ (w ⊩ ψ) := by
-  apply Iff.intro
-  . case mp =>
-    intro H
-    simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star] at H
-    exact or_iff_not_and_not.mpr H
-  . case mpr =>
-    intro H
-    simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star]
-    exact or_iff_not_and_not.mp H
-
-/--
-The semantics of fusion lines lines up with respect to its definition
-in terms of relevant implication and negation.
--/
-theorem RMModel.V_fusion (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ):= by
-  apply Iff.intro
-  . case mp =>
-    intro H
-    simp only [Formula.Fusion, M.V_not, URMModel.nholds, M.V_imp, M.V_not,
-               and_imp, not_forall, Classical.not_imp, not_not] at H
-
-    have ⟨w1, w2, H1, H2, H3⟩ := H
-    exists w1, (w2*ᵣ)
-    apply And.intro
-    . case left => sorry
-    . case right =>
-      apply And.intro H2 H3
-  . case mpr =>
-    intro H
-    have ⟨w1, w2, H1, H2, H3⟩ := H
-    simp only [Formula.Fusion, M.V_not, URMModel.nholds, M.V_imp, M.V_not,
-               and_imp, not_forall, Classical.not_imp, not_not]
-    exists w1, w2
-    sorry
-
 /-- The hereditariness condition extends from atoms to all formulas -/
 theorem RMModel.heredity (M : RMModel) (a b : M.W) (φ : Formula):
 (a ⊩ φ) -> (a ≤ᵣ b) -> b ⊩ φ := by
@@ -139,3 +118,52 @@ theorem RMModel.heredity (M : RMModel) (a b : M.W) (φ : Formula):
     simp_all only [M.V_imp φ ψ]
     intros w1 w2 C
     exact H1 w1 w2 (And.intro (M.con_? b w1 w2 a H2 C.left) C.right)
+
+/--
+The semantics of or lines up as expected with respect to its definition
+in terms of not and and
+-/
+theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∨ᵣ ψ) ↔ (w ⊩ φ) ∨ (w ⊩ ψ) := by
+  apply Iff.intro
+  . case mp =>
+    intro H
+    simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star] at H
+    exact or_iff_not_and_not.mpr H
+  . case mpr =>
+    intro H
+    simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star]
+    exact or_iff_not_and_not.mp H
+
+
+lemma RMModel.V_fusion_if_not_implies_not (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∘ᵣ ψ) ↔ (w ⊩ ¬ᵣ(φ →ᵣ ¬ᵣψ)) := by
+  rw [Formula.Fusion]
+
+lemma RModel.V_fusion_ext1 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∘ᵣ ψ) ↔ ¬(∀b c, (M.R (w*ᵣ) b c ∧ b ⊩ φ) → ¬(c*ᵣ ⊩ ψ)) := by
+  simp only [RMModel.V_fusion_if_not_implies_not, RMModel.V_not,
+    URMModel.nholds, RMModel.V_imp, and_imp, not_forall,
+    Classical.not_imp, not_not]
+
+lemma RModel.V_fusion_ext2 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
+  simp [V_fusion_ext1, and_imp, not_forall, Classical.not_imp, not_not]
+
+lemma RMModel.V_fusion_ext3 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+  (∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ)) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
+  apply Iff.intro
+  . case mp =>
+    intro H
+    have ⟨w1, w2, R12w, w1φ, w2ψ⟩ := H
+    sorry
+  . case mpr =>
+    sorry
+
+/--
+The semantics of fusion lines lines up with respect to its definition
+in terms of relevant implication and negation.
+-/
+theorem RMModel.V_fusion (M : RMModel) (φ ψ : Formula) (w : M.W) :
+(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ) := by
+  sorry

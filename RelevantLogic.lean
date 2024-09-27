@@ -3,3 +3,4 @@
 import «RelevantLogic».Formula
 import «RelevantLogic».HilbertProofTheory
 import «RelevantLogic».RoutlyMeyerModels
+import «RelevantLogic».RoutlyMeyerModels
