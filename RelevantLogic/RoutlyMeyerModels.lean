@@ -59,9 +59,9 @@ a = b -> b ≤ᵣ a := by
   intro H
   simp only [H, F.con_rfl b]
 
-theorem RMFrame.con_eq (F : RMFrame) {a b : F.W} :
-a ≤ᵣ b -> b ≤ᵣ a -> a = b := by
-  sorry
+-- lemma RMFrame.con_eq (F : RMFrame) {a b : F.W} :
+-- a ≤ᵣ b -> b ≤ᵣ a -> a = b := by
+--   sorry
 
 /--
 Version of `RMFrame.con_?` that infers worlds from hypotheses
@@ -135,30 +135,30 @@ theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
     simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star]
     exact or_iff_not_and_not.mp H
 
+-- lemma RMModel.V_fusion_if_not_implies_not (M : RMModel) (φ ψ : Formula) (w : M.W) :
+-- (w ⊩ φ ∘ᵣ ψ) ↔ (w ⊩ ¬ᵣ(φ →ᵣ ¬ᵣψ)) := by
+--   rw [Formula.Fusion]
 
-lemma RMModel.V_fusion_if_not_implies_not (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∘ᵣ ψ) ↔ (w ⊩ ¬ᵣ(φ →ᵣ ¬ᵣψ)) := by
-  rw [Formula.Fusion]
+-- lemma RModel.V_fusion_ext1 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+-- (w ⊩ φ ∘ᵣ ψ) ↔ ¬(∀b c, (M.R (w*ᵣ) b c ∧ b ⊩ φ) → ¬(c*ᵣ ⊩ ψ)) := by
+--   simp only [RMModel.V_fusion_if_not_implies_not, RMModel.V_not,
+--     URMModel.nholds, RMModel.V_imp, and_imp, not_forall,
+--     Classical.not_imp, not_not]
 
-lemma RModel.V_fusion_ext1 (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∘ᵣ ψ) ↔ ¬(∀b c, (M.R (w*ᵣ) b c ∧ b ⊩ φ) → ¬(c*ᵣ ⊩ ψ)) := by
-  simp only [RMModel.V_fusion_if_not_implies_not, RMModel.V_not,
-    URMModel.nholds, RMModel.V_imp, and_imp, not_forall,
-    Classical.not_imp, not_not]
+-- lemma RModel.V_fusion_ext2 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+-- (w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
+--   simp [V_fusion_ext1, and_imp, not_forall, Classical.not_imp, not_not]
 
-lemma RModel.V_fusion_ext2 (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
-  simp [V_fusion_ext1, and_imp, not_forall, Classical.not_imp, not_not]
-
-lemma RMModel.V_fusion_ext3 (M : RMModel) (φ ψ : Formula) (w : M.W) :
-  (∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ)) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
-  apply Iff.intro
-  . case mp =>
-    intro H
-    have ⟨w1, w2, R12w, w1φ, w2ψ⟩ := H
-    sorry
-  . case mpr =>
-    sorry
+-- lemma RMModel.V_fusion_ext3 (M : RMModel) (φ ψ : Formula) (w : M.W) :
+--   (∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ)) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
+--   apply Iff.intro
+--   . case mp =>
+--     intro H
+--     contrapose! H
+--     intro w1 w2 R120 w1φ w2ψ
+--     sorry
+--   . case mpr =>
+--     sorry
 
 /--
 The semantics of fusion lines lines up with respect to its definition
