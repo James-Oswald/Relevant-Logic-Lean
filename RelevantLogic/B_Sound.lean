@@ -36,21 +36,21 @@ lemma and_intro_valid : ⊨ᴮ ((A →ᵣ B) ∧ᵣ (A →ᵣ C) →ᵣ (A →�
   . case right =>
     exact H1AC w3 w4 R134 w3A
 
-theorem or_intro_left_valid : ⊨ᴮ (A →ᵣ A ∨ᵣ B) := by
+lemma or_intro_left_valid : ⊨ᴮ (A →ᵣ A ∨ᵣ B) := by
   intros M
   simp only [M.V_imp, M.V_or, and_imp]
   intros b c H1 H2
   apply Or.inl
   exact M.heredity b c A H2 H1
 
-theorem or_intro_right_valid : ⊨ᴮ (B →ᵣ A ∨ᵣ B) := by
+lemma or_intro_right_valid : ⊨ᴮ (B →ᵣ A ∨ᵣ B) := by
   intros M
   simp only [M.V_imp, M.V_or, and_imp]
   intros b c H1 H2
   apply Or.inr
   exact M.heredity b c B H2 H1
 
-theorem or_elim_valid : ⊨ᴮ ((A →ᵣ C) ∧ᵣ (B →ᵣ C) →ᵣ (A ∨ᵣ B →ᵣ C)) := by
+lemma or_elim_valid : ⊨ᴮ ((A →ᵣ C) ∧ᵣ (B →ᵣ C) →ᵣ (A ∨ᵣ B →ᵣ C)) := by
   intros M
   simp only [M.V_imp, and_imp, M.V_or, M.V_and]
   intros w1 w2 R012 H1AC H1BC w3 w4 R234 w3AoB
@@ -61,7 +61,7 @@ theorem or_elim_valid : ⊨ᴮ ((A →ᵣ C) ∧ᵣ (B →ᵣ C) →ᵣ (A ∨�
   . case inr w3B =>
     exact H1BC w3 w4 R134 w3B
 
-theorem and_or_valid : ⊨ᴮ (A ∧ᵣ (B ∨ᵣ C) →ᵣ (A ∧ᵣ B) ∨ᵣ (A ∧ᵣ C)) := by
+lemma and_or_valid : ⊨ᴮ (A ∧ᵣ (B ∨ᵣ C) →ᵣ (A ∧ᵣ B) ∨ᵣ (A ∧ᵣ C)) := by
   intro M
   simp only [M.V_imp, M.V_or, M.V_and]
   intros w1 w2 H
@@ -74,13 +74,13 @@ theorem and_or_valid : ⊨ᴮ (A ∧ᵣ (B ∨ᵣ C) →ᵣ (A ∧ᵣ B) ∨ᵣ 
     exact Or.inr (And.intro (M.heredity w1 w2 A w1A R012)
      (M.heredity w1 w2 C H2 R012))
 
-theorem dne_valid : ⊨ᴮ (¬ᵣ¬ᵣA →ᵣ A) := by
+lemma dne_valid : ⊨ᴮ (¬ᵣ¬ᵣA →ᵣ A) := by
   intro M
   simp only [M.V_imp, and_imp, M.V_not, M.V_nnn_ppp]
   intros b c H1 H2
   exact M.heredity b c A H2 H1
 
-theorem mp_valid : (⊨ᴮ A) → (⊨ᴮ A →ᵣ B) → (⊨ᴮ B) := by
+lemma mp_valid : (⊨ᴮ A) → (⊨ᴮ A →ᵣ B) → (⊨ᴮ B) := by
   intros H1 H2 M
   simp_all only [valid]
   have H1' := H1 M
@@ -88,11 +88,11 @@ theorem mp_valid : (⊨ᴮ A) → (⊨ᴮ A →ᵣ B) → (⊨ᴮ B) := by
   simp [M.V_imp] at H2'
   exact H2' 0 0 (M.con_rfl 0) H1'
 
-theorem adj_valid : (⊨ᴮ A) → (⊨ᴮ B) → (⊨ᴮ A ∧ᵣ B) := by
+lemma adj_valid : (⊨ᴮ A) → (⊨ᴮ B) → (⊨ᴮ A ∧ᵣ B) := by
   intros H1 H2 M
   simp_all only [valid, M.V_and, and_self]
 
-theorem pre_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (C →ᵣ A) →ᵣ (C →ᵣ B)) := by
+lemma pre_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (C →ᵣ A) →ᵣ (C →ᵣ B)) := by
   intros H M
   have H0AB := H M
   simp_all only [M.V_imp]
@@ -105,7 +105,7 @@ theorem pre_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (C →ᵣ A) →ᵣ (C →�
   apply H0AB w4 w4
   exact ⟨M.con_rfl w4, w4A⟩
 
-theorem suf_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (B →ᵣ C) →ᵣ (A →ᵣ C)) := by
+lemma suf_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (B →ᵣ C) →ᵣ (A →ᵣ C)) := by
   intros H M
   have H0AB := H M
   simp_all only [M.V_imp]
@@ -121,7 +121,7 @@ theorem suf_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ (B →ᵣ C) →ᵣ (A →�
   . case right =>
     apply H0AB w3 w3 ⟨M.con_rfl w3, H3A⟩
 
-theorem rcont_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ ¬ᵣB →ᵣ ¬ᵣA) := by
+lemma rcont_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ ¬ᵣB →ᵣ ¬ᵣA) := by
   intros H M
   have H' := H M
   simp_all only [M.V_imp, and_imp, M.V_not]
@@ -130,7 +130,7 @@ theorem rcont_valid : (⊨ᴮ A →ᵣ B) → (⊨ᴮ ¬ᵣB →ᵣ ¬ᵣA) := b
   simp_all only [URMModel.nholds, not_not]
   exact H' (w2*ᵣ) (w1*ᵣ) (M.con_star w1 w2 R012) H1nB
 
-theorem RM_sound (ϕ : Formula) : ⊢ᴮ ϕ → ⊨ᴮ ϕ := by
+lemma RM_sound (ϕ : Formula) : ⊢ᴮ ϕ → ⊨ᴮ ϕ := by
   intros H
   cases H
   . case intro val =>

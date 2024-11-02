@@ -33,7 +33,10 @@ def Formula.MBicond (ϕ ψ : Formula) : Formula := (ϕ ⊃ᵣ ψ) ∧ᵣ (ψ ⊃
 infixr:50 " ≡ᵣ " => Formula.MBicond
 
 /-- The Intensional conjunction/fusion/consistence/cotenability operator
-    defined in terms of not and relevant implication -/
+    defined in terms of not and relevant implication note that this
+    definition is only valid in R and stronger systems. See
+    https://consequently.org/papers/rle.pdf page 12.
+    -/
 def Formula.Fusion (ϕ ψ : Formula) : Formula := ¬ᵣ(ϕ →ᵣ ¬ᵣψ)
 infixr:63 " ∘ᵣ " => Formula.Fusion
 

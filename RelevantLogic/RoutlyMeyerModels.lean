@@ -67,7 +67,7 @@ a = b -> b ≤ᵣ a := by
 Version of `RMFrame.con_?` that infers worlds from hypotheses
 via type unification, very useful for actually proving things.
 -/
-theorem RMFrame.con_?' (F : RMFrame) {a b c d: F.W} :
+lemma RMFrame.con_?' (F : RMFrame) {a b c d: F.W} :
 d ≤ᵣ a -> F.R a b c -> Rᵣ d b c := by
   intros H1 H2
   exact F.con_? a b c d H1 H2
@@ -135,35 +135,14 @@ theorem RMModel.V_or (M : RMModel) (φ ψ : Formula) (w : M.W) :
     simp only [Formula.Or, M.V_not, URMModel.nholds, M.V_and, M.star_star]
     exact or_iff_not_and_not.mp H
 
--- lemma RMModel.V_fusion_if_not_implies_not (M : RMModel) (φ ψ : Formula) (w : M.W) :
--- (w ⊩ φ ∘ᵣ ψ) ↔ (w ⊩ ¬ᵣ(φ →ᵣ ¬ᵣψ)) := by
---   rw [Formula.Fusion]
-
--- lemma RModel.V_fusion_ext1 (M : RMModel) (φ ψ : Formula) (w : M.W) :
--- (w ⊩ φ ∘ᵣ ψ) ↔ ¬(∀b c, (M.R (w*ᵣ) b c ∧ b ⊩ φ) → ¬(c*ᵣ ⊩ ψ)) := by
---   simp only [RMModel.V_fusion_if_not_implies_not, RMModel.V_not,
---     URMModel.nholds, RMModel.V_imp, and_imp, not_forall,
---     Classical.not_imp, not_not]
-
--- lemma RModel.V_fusion_ext2 (M : RMModel) (φ ψ : Formula) (w : M.W) :
--- (w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
---   simp [V_fusion_ext1, and_imp, not_forall, Classical.not_imp, not_not]
-
--- lemma RMModel.V_fusion_ext3 (M : RMModel) (φ ψ : Formula) (w : M.W) :
---   (∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ)) ↔ ∃ b c, M.R (w*ᵣ) b c ∧ b ⊩ φ ∧ c*ᵣ ⊩ ψ := by
---   apply Iff.intro
---   . case mp =>
---     intro H
---     contrapose! H
---     intro w1 w2 R120 w1φ w2ψ
---     sorry
---   . case mpr =>
---     sorry
-
 /--
-The semantics of fusion lines lines up with respect to its definition
-in terms of relevant implication and negation.
+We have this theorem but fusion in B is not nice. Actually,
+We can't even define fusion in B, probably... We require
+it is impossible to prove the nice permuted semantics more
+commonly used i.e.
+(c ⊩ φ ∘ᵣ ψ) ↔ ∃ a b, M.R a b c ∧ a ⊩ φ ∧ b*ᵣ ⊩ ψ
 -/
-theorem RMModel.V_fusion (M : RMModel) (φ ψ : Formula) (w : M.W) :
-(w ⊩ φ ∘ᵣ ψ) ↔ ∃ b c, (M.R b c w) ∧ (b ⊩ φ) ∧ (c ⊩ ψ) := by
-  sorry
+lemma RModel.V_fusion (M : RMModel) (φ ψ : Formula) (c : M.W) :
+(c ⊩ φ ∘ᵣ ψ) ↔ ∃ a b, M.R (c*ᵣ) a b ∧ a ⊩ φ ∧ b*ᵣ ⊩ ψ := by
+  simp [Formula.Fusion, M.V_not, URMModel.nholds, M.V_imp, and_imp, not_forall,
+    Classical.not_imp, not_not]

@@ -49,3 +49,20 @@ lemma BProvable.ofProof {ϕ} (p : T⊢ᴮ ϕ) : ⊢ᴮϕ := ⟨p⟩
 lemma BProvable.iff_exists : ⊢ᴮϕ ↔ ∃ _ : T⊢ᴮ ϕ, True := by
   simp_all only [exists_prop', and_true]
   rfl
+
+/-- If ϕ is provable, then there exists a proof of ϕ, exatract it -/
+noncomputable def BProof.ofProvable : ⊢ᴮϕ → T⊢ᴮϕ :=
+  Classical.choice
+
+lemma adj_bi : ⊢ᴮ(ϕ ∧ᵣ ψ) ↔ ⊢ᴮ ϕ ∧ ⊢ᴮ ψ := by
+  apply Iff.intro
+  . case mp =>
+    intro H
+    apply And.intro
+    . case left =>
+      exact BProvable.ofProof (BProof.mp (BProof.ofProvable H) (@BProof.and_elim_left ϕ ψ))
+    . case right =>
+      exact BProvable.ofProof (BProof.mp (BProof.ofProvable H) (@BProof.and_elim_right ϕ ψ))
+  . case mpr =>
+    intro H
+    exact BProvable.ofProof (BProof.adj (BProof.ofProvable H.left) (BProof.ofProvable H.right))
